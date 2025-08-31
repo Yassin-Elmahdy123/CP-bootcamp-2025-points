@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Participation Points Checker</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    nav {
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      color: white;
+      padding: 15px 30px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .card h2 {
+      margin-bottom: 20px;
+      color: #6a11cb;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    input:focus {
+      border-color: #6a11cb;
+      box-shadow: 0 0 6px rgba(106,17,203,0.4);
+    }
+    button {
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      color: white;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>CP Bootcamp 2025</nav>
+
+  <main>
+    <div class="card">
+      <h2>Check Your Participation Points</h2>
+      <form id="pointsForm">
+        <input type="email" id="emailInput" placeholder="Enter your email" required />
+        <button type="submit">Check</button>
+      </form>
+      <div id="result"></div>
+    </div>
+  </main>
+
+  <script>
+    let participants = {};
+
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTC6WFvkaeoGpuK9lrQz7SXa2VBn1KtEPBsPyOa7E56whIZ-cuZgLHKZduF0LQyAUlMYcFOBcD_aC1B/pub?gid=0&single=true&output=csv";
+    
+    async function loadParticipants() {
+      const response = await fetch(sheetUrl);
+      const text = await response.text();
+      const rows = text.split("\n").map(r => r.split(","));
+
+      for (let i = 1; i < rows.length; i++) {
+        const email = rows[i][10]?.trim().toLowerCase();
+        const points = rows[i][1]?.trim();
+        if (email && points) {
+          participants[email] = points;
+        }
+      }
+    }
+
+    document.getElementById("pointsForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      if (Object.keys(participants).length === 0) {
+        await loadParticipants();
+      }
+
+      const email = document.getElementById("emailInput").value.trim().toLowerCase();
+      const resultDiv = document.getElementById("result");
+
+      if (participants[email] !== undefined) {
+        resultDiv.textContent = `${email} has ${participants[email]} points.`;
+        resultDiv.style.color = "green";
+      } else {
+        resultDiv.textContent = `Email not found in the list.`;
+        resultDiv.style.color = "red";
+      }
+    });
+
+    loadParticipants();
+  </script>
+
+</body>
+</html>
